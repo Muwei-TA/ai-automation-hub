@@ -1,0 +1,22 @@
+name: ai-automation-hub
+prefect-version: 3.3.0
+build: []
+push: []
+pull: []
+deployments:
+  - name: nas-default
+    entrypoint: src/automation_hub/flows/nas_health.py:nas_health
+    work_pool: {name: nas-local}
+    schedules: []
+  - name: nas-default
+    entrypoint: src/automation_hub/flows/github_digest.py:github_digest
+    work_pool: {name: nas-local}
+    schedules: []
+  - name: nas-default
+    entrypoint: src/automation_hub/flows/gitea_status.py:gitea_status
+    work_pool: {name: nas-local}
+    schedules: []
+  - name: nas-default
+    entrypoint: src/automation_hub/flows/comfyui_submit.py:comfyui_submit
+    work_pool: {name: nas-local}
+    schedules: []

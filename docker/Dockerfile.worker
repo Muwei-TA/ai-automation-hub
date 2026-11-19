@@ -1,0 +1,11 @@
+FROM python:3.12-slim
+WORKDIR /app
+COPY pyproject.toml README.md ./
+COPY src ./src
+COPY workflows ./workflows
+COPY prefect.yaml ./prefect.yaml
+RUN pip install --no-cache-dir ".[worker]" && useradd --create-home --uid 10001 appuser && chown -R appuser:appuser /app
+USER appuser
+ENV PYTHONPATH=/app/src
+ENV PREFECT_HOME=/home/appuser/.prefect
+CMD ["prefect", "worker", "start", "--pool", "nas-local", "--type", "process"]

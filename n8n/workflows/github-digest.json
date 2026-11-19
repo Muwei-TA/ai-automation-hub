@@ -1,0 +1,33 @@
+{
+  "name": "Daily GitHub project digest -> Prefect",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "days", "triggerAtHour": 9, "triggerAtMinute": 0}]}},
+      "id": "3c5c0d48-03ad-4c0c-aa43-ec8a1f7caf51",
+      "name": "Every day at 09:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [260, 280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://gateway:8099/v1/jobs/github-digest",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ parameters: { query: 'topic:self-hosted automation', max_items: 10 }, idempotency_key: 'digest-' + $now.toFormat('yyyy-MM-dd') }) }}",
+        "options": {"timeout": 30000}
+      },
+      "id": "a0bec657-c989-4af6-ae6a-68b1f79272bf",
+      "name": "Submit to Prefect",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 280]
+    }
+  ],
+  "connections": {"Every day at 09:00": {"main": [[{"node": "Submit to Prefect", "type": "main", "index": 0}]]}},
+  "settings": {"executionOrder": "v1", "timezone": "Asia/Shanghai"},
+  "active": false
+}
