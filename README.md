@@ -112,9 +112,21 @@ docs/                       架构与扩展说明
 ## 本地测试
 
 ```bash
-python -m pip install '.[gateway,dev]'
-python -m pytest -q
+python -m pip install '.[gateway,worker,dev]'
+python -m pytest -q --cov=automation_hub --cov-report=term-missing --cov-fail-under=90
 ```
+
+### 部署前只读检查（v0.2 开发分支）
+
+建议在编辑 `.env` 后、启动任何容器前运行：
+
+```bash
+python scripts/preflight.py --env-file .env
+# 或用于 CI 的无敏感值 JSON 输出
+python scripts/preflight.py --env-file .env --json
+```
+
+此脚本只做静态校验，不连接外部服务、不读取已有凭据仓库，也不会输出密钥内容。它会拦截示例占位符、明显无效的 Prefect API URL、过短的密钥，并警告容器内 localhost 地址、Docker Socket 以及部分不匹配的可选配置。**检查通过不等于 Prefect、n8n、Gitea 或 ComfyUI 已经连通**。详细的测试范围见 [docs/TESTING.md](docs/TESTING.md)。
 
 ## 版本范围
 
