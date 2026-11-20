@@ -45,3 +45,11 @@ Docker 镜像构建与运行、n8n UI 导入兼容性、真实 Prefect Server+Wo
     PREFECT_API_URL=http://<prefect-server>:4200/api python scripts/check_flow_run.py <flow_run_id> --timeout 120
 
 只有最终状态 COMPLETED 时才返回退出码 0；FAILED、CRASHED、CANCELLED、TIMEOUT 均返回非零。该脚本默认只读，不会触发新的 Flow Run。
+
+
+## 独立容器集成 CI
+
+- prefect-compose-e2e：使用 compose.ci.yaml 启动隔离 Prefect Server、Process Worker 和 Gateway，通过真实 HTTP 调度验证 nas-health 最终 Completed。
+- n8n-postgres-smoke：启动隔离 PostgreSQL 和 n8n，导入导出示例工作流，使用 pg_dump 和 psql 对单独恢复数据库进行逻辑恢复检查。
+
+CI 只使用公开的测试密钥和短期数据卷；不能替代生产 PostgreSQL/n8n-data/加密密钥的真实恢复演练。
