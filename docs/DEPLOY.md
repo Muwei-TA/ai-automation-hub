@@ -33,12 +33,12 @@ n8n 流程里使用 `http://gateway:8099` 是因为两者在 Compose 内同一�
 5. `./scripts/smoke-test.sh`，观察返回的 `flow_run_id`。
 6. 在 Prefect UI 确认该任务 `Completed`，不要把 HTTP 202 当成成功。
 7. 导入 n8n `github-digest`，绑定 Header Auth 并手动执行，再激活定时器。
-8. 最后开启 Gitea 和 ComfyUI 集成；将它们配置为可访问但不公开的内部服务。
+8. 最后按 WEBHOOK.md 使用签名入口接入 Gitea，再开启 ComfyUI 集成；将它们配置为可访问但不公开的内部服务。
 
 ## 6. 未来版本的建设任务
 
 - 统一消息通知适配器（Telegram/Discourse/邮件），外加重试与死信队列。
-- Gitea Webhook HMAC 校验，限定来源 + IP allowlist。
+- Gitea Webhook 已增加 HMAC-SHA256 校验；还需反向代理层的来源限制和限速，并验证真实 Gitea 事件投递。
 - NAS exporter 与容器指标/资源竞争监控。
 - 执行日志敏感信息脱敏和 Token 计量。
 - Mac/VPS Worker 的自动化代码分发和版本锁定。

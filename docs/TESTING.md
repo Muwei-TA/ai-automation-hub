@@ -33,3 +33,6 @@ python scripts/preflight.py --env-file .env
 ## 4. 尚未自动化验收的内容
 
 Docker 镜像构建与运行、n8n UI 导入兼容性、真实 Prefect Server+Worker 跨主机调度、NAS 盘挂载及 GPU 队列、网络断连恢复。这些必须在有 Docker 和隔离测试服务的环境中继续验收；不可把当前测试结果当作生产就绪证明。
+
+
+生产就绪验收门槛参见 [PRODUCTION_ACCEPTANCE.md](PRODUCTION_ACCEPTANCE.md)。如未完成真实容器、工作池和故障恢复验收，不得将单元测试通过认定为生产就绪。

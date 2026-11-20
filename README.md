@@ -65,7 +65,7 @@ docker compose --profile worker up -d --build worker
 1. 在 n8n UI 导入 `n8n/workflows/github-digest.json`。
 2. 在 n8n Credentials 中新建 **Header Auth**：Name `X-Automation-Key`，Value 为 `.env` 中的 `GATEWAY_API_KEY`。不要将密钥写入工作流 JSON。
 3. 把该 Credential 分配给工作流的 HTTP Request 节点，先手动执行成功，再激活调度。
-4. `gitea-status-webhook.json` 仅供**可信内网**参考；未验证 webhook 签名，**不得将此入口直接暴露公网**。应先在网关或 n8n 前置层增加 Gitea 签名/HMAC 验证。
+4. 旧版无签名验证的 Gitea n8n Webhook 示例已移除。Gitea Push 事件需通过 Gateway 签名入口 /v1/webhooks/gitea，配置独立 GITEA_WEBHOOK_SECRET（至少 32 字符）。详见 docs/WEBHOOK.md。
 
 ### 手动调用
 

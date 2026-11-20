@@ -70,6 +70,9 @@ def validate(config: dict[str, str]) -> dict[str, list[str]]:
             elif parsed.username or parsed.password:
                 errors.append(f"{name} must not embed credentials")
 
+    webhook_secret = config.get("GITEA_WEBHOOK_SECRET", "")
+    if webhook_secret and len(webhook_secret) < 32:
+        errors.append("GITEA_WEBHOOK_SECRET must contain at least 32 characters when enabled")
     if bool(config.get("LLM_MODEL")) != bool(config.get("LLM_BASE_URL")):
         warnings.append("LLM_MODEL and LLM_BASE_URL should be set together to enable AI summaries")
     if config.get("DOCKER_SOCKET"):
