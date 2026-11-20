@@ -41,8 +41,20 @@ jobs:
       - name: Start Gateway and verify liveness
         run: |
           docker compose up -d gateway
-          curl --fail --retry 15 --retry-delay 2 --retry-connrefused http://127.0.0.1:8099/healthz
+          ready=false
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --max-time 3 http://127.0.0.1:8099/healthz; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then
+            docker compose logs gateway
+            exit 1
+          fi
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/readyz)" = "503"
       - name: Cleanup
         if: always()
         run: docker compose --profile worker down --volumes || true
+
