@@ -52,9 +52,16 @@ services:
       - "127.0.0.1:${GATEWAY_PORT:-8099}:8099"
     environment:
       GATEWAY_API_KEY: ${GATEWAY_API_KEY:?Set GATEWAY_API_KEY in .env}
+      GITEA_WEBHOOK_SECRET: ${GITEA_WEBHOOK_SECRET:-}
       PREFECT_API_URL: ${PREFECT_API_URL:?Set PREFECT_API_URL in .env}
       PREFECT_API_AUTH_STRING: ${PREFECT_API_AUTH_STRING:-}
     networks: [backend]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8099/healthz', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
   # Optional local NAS Worker. Do NOT mount /var/run/docker.sock by default.
   worker:

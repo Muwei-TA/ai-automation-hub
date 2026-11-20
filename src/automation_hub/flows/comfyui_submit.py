@@ -22,7 +22,7 @@ def inject_prompt(value: Any, prompt: str) -> Any:
     return value
 
 
-@flow(name="comfyui-submit", retries=1, retry_delay_seconds=10)
+@flow(name="comfyui-submit", retries=0)
 def comfyui_submit(workflow_name: str, prompt_text: str) -> dict:
     if not re.fullmatch(r"[a-zA-Z0-9_-]{1,64}", workflow_name):
         raise ValueError("Invalid workflow name")

@@ -15,4 +15,74 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install '.[gateway,worker,dev]'
       - run: python -m compileall -q src
+      - run: python scripts/validate_release.py
       - run: python -m pytest -q --cov=automation_hub --cov-report=term-missing --cov-fail-under=90
+
+  docker-build-smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GATEWAY_API_KEY: local-ci-test-key-not-for-production-123456
+      GITEA_WEBHOOK_SECRET: local-ci-webhook-secret-not-for-production-123456
+      PREFECT_API_URL: http://127.0.0.1:4200/api
+      N8N_DB_PASSWORD: local-ci-password-not-for-production
+      N8N_ENCRYPTION_KEY: local-ci-encryption-key-not-for-production-1234
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose configuration
+        run: docker compose --profile worker config --quiet
+      - name: Build Gateway and Worker images
+        run: docker compose --profile worker build gateway worker
+      - name: Verify non-root containers
+        run: |
+          docker compose run --rm --no-deps --entrypoint id gateway | grep -q "uid=10001"
+          docker compose --profile worker run --rm --no-deps --entrypoint id worker | grep -q 'uid=10001'
+      - name: Start Gateway and verify liveness
+        run: |
+          docker compose up -d gateway
+          ready=false
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --max-time 3 http://127.0.0.1:8099/healthz; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then
+            docker compose logs gateway
+            exit 1
+          fi
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/readyz)" = "503"
+      - name: Cleanup
+        if: always()
+        run: docker compose --profile worker down --volumes || true
+
+  prefect-compose-e2e:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GATEWAY_API_KEY: local-ci-test-key-not-for-production-123456
+      GITEA_WEBHOOK_SECRET: local-ci-webhook-secret-not-for-production-123456
+      PREFECT_API_URL: http://prefect-ci:4200/api
+      N8N_DB_PASSWORD: local-ci-password-not-for-production
+      N8N_ENCRYPTION_KEY: local-ci-encryption-key-not-for-production-1234
+    steps:
+      - uses: actions/checkout@v4
+      - name: Real Prefect Server Worker Gateway E2E
+        run: bash scripts/ci-compose-integration.sh
+
+  n8n-postgres-smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GATEWAY_API_KEY: local-ci-test-key-not-for-production-123456
+      PREFECT_API_URL: http://prefect-ci:4200/api
+      N8N_DB_PASSWORD: local-ci-password-not-for-production
+      N8N_ENCRYPTION_KEY: local-ci-encryption-key-not-for-production-1234
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start n8n, import workflow, and test PostgreSQL backup restore
+        run: bash scripts/ci-n8n-backup-smoke.sh
