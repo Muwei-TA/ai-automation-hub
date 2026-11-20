@@ -13,6 +13,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install '.[gateway,dev]'
+      - run: python -m pip install '.[gateway,worker,dev]'
       - run: python -m compileall -q src
-      - run: pytest -q
+      - run: python -m pytest -q --cov=automation_hub --cov-report=term-missing --cov-fail-under=90
