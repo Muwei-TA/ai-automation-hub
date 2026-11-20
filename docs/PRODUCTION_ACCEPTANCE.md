@@ -22,7 +22,8 @@
 
 ## 三、真实功能验收
 
-- [ ] 在隔离 work pool 中注册全部四个 Deployment，逐个手动提交并验证最终 Flow Run state=Completed。
+- [x] AIO Sandbox 内独立 Prefect 3.9 Server + Process Worker 已验证 nas-health Flow Run 最终 Completed；通过明确 Process Worker working_dir 修复了临时目录找不到源码造成的 Crashed。
+- [ ] 在目标 NAS 的隔离 work pool 中注册全部四个 Deployment，逐个手动提交并验证最终 Flow Run state=Completed。
 - [ ] 真实 n8n 导入版本适配、Header Auth 凭据绑定与定时器执行正常。
 - [ ] 使用测试仓库真实投递 Gitea Push：有效签名正确进入 Prefect、错误签名拒绝、重复投递不会制造重复任务。
 - [ ] ComfyUI 使用专用测试模板、低资源工作流验证排队/状态查询/完成，异常后不造成重复 GPU 任务。
@@ -42,6 +43,6 @@
 
 ## 结果口径
 
-当前阶段：**未通过生产验收**。在 AIO Sandbox 已完成 Python 测试、模拟 HTTP 调度以及本地 Prefect Flow 执行，但没有 Docker Engine、真实 n8n/Prefect Work Pool、真实 Gitea/ComfyUI 测试环境的验收证据。
+当前阶段：**未通过生产验收**。在 AIO Sandbox 已完成 Python 测试、模拟 HTTP 调度以及本地 Prefect Flow 执行，隔离 Prefect Run 需使用诊断预取窗口绕过沙箱时区不一致；尚未验证生产默认轮询配置；并且没有 Docker Engine、真实 n8n/Prefect Work Pool、真实 Gitea/ComfyUI 测试环境的验收证据。
 
 推荐先在独立 NAS VM 或隔离的 Docker 主机上执行第二、三部分；不得直接将本仓库部署到 BlackRoom 正式站或使用正式令牌作压力测试。

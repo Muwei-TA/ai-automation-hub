@@ -34,6 +34,11 @@ def validate_repository(root: Path = ROOT) -> list[str]:
     entrypoints = {d.get("entrypoint") for d in deployments}
     if entrypoints != EXPECTED_FLOWS or len(deployments) != 4:
         errors.append("Expected exactly four known Prefect deployments")
+    for deployment in deployments:
+        settings = deployment.get("work_pool", {})
+        variables = settings.get("job_variables", {})
+        if variables.get("working_dir") != "/app":
+            errors.append("NAS Process Worker must use /app as the deployment working_dir")
     for entry in entrypoints:
         if not isinstance(entry,str) or ":" not in entry or not (root / entry.split(":", 1)[0]).is_file():
             errors.append(f"Missing deployment source: {entry}")

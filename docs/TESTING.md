@@ -36,3 +36,12 @@ Docker 镜像构建与运行、n8n UI 导入兼容性、真实 Prefect Server+Wo
 
 
 生产就绪验收门槛参见 [PRODUCTION_ACCEPTANCE.md](PRODUCTION_ACCEPTANCE.md)。如未完成真实容器、工作池和故障恢复验收，不得将单元测试通过认定为生产就绪。
+
+
+## 验证真实 Flow Run 最终状态
+
+在 Gateway 返回 202 和 flow_run_id 后执行（必须从运行该命令的主机访问 Prefect API）：
+
+    PREFECT_API_URL=http://<prefect-server>:4200/api python scripts/check_flow_run.py <flow_run_id> --timeout 120
+
+只有最终状态 COMPLETED 时才返回退出码 0；FAILED、CRASHED、CANCELLED、TIMEOUT 均返回非零。该脚本默认只读，不会触发新的 Flow Run。

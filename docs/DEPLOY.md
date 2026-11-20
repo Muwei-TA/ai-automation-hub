@@ -55,3 +55,11 @@ cd ai-automation-hub
 ```
 
 在部署主机上创建 `.env`，依据本文件逐项配置。生产配置应在主机端或专用密钥管理器中维护，不应写入 Git 历史。
+
+## Process Worker 的工作目录（生产必需）
+
+由于 PREFECT 的 pull 步骤为空，Process Worker 运行 Flow 时必须从包含 src/ 的项目根目录启动。Prefect 默认创建临时运行目录会导致 FileNotFoundError 并产生 Crashed 任务。
+
+默认 Compose Worker 将项目代码内置在 /app，工作目录为 /app。prefect.yaml 向四个 Deployment 显式写入 work_pool.job_variables.working_dir=/app。若使用 Mac/VPS 独立 Worker，须为其单独工作池注册正确的本机绝对工作目录，并确保代码版本匹配，不要复用 NAS 的 /app 路径。
+
+验收时必须从 Prefect API 检查实际 Flow Run 最终为 Completed，不能只以 Deployment 注册成功、Worker Ready 或 HTTP 202 作为成功证据。
