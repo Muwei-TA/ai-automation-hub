@@ -58,3 +58,17 @@ jobs:
         if: always()
         run: docker compose --profile worker down --volumes || true
 
+  prefect-compose-e2e:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GATEWAY_API_KEY: local-ci-test-key-not-for-production-123456
+      GITEA_WEBHOOK_SECRET: local-ci-webhook-secret-not-for-production-123456
+      PREFECT_API_URL: http://prefect-ci:4200/api
+      N8N_DB_PASSWORD: local-ci-password-not-for-production
+      N8N_ENCRYPTION_KEY: local-ci-encryption-key-not-for-production-1234
+    steps:
+      - uses: actions/checkout@v4
+      - name: Real Prefect Server Worker Gateway E2E
+        run: bash scripts/ci-compose-integration.sh

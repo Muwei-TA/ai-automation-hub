@@ -4,6 +4,7 @@ COPY pyproject.toml README.md ./
 COPY src ./src
 COPY workflows ./workflows
 COPY prefect.yaml ./prefect.yaml
+COPY scripts/check_flow_run.py ./scripts/check_flow_run.py
 RUN pip install --no-cache-dir ".[worker]" && useradd --create-home --uid 10001 appuser && chown -R appuser:appuser /app
 USER appuser
 ENV PYTHONPATH=/app/src
