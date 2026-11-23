@@ -86,3 +86,27 @@ jobs:
       - uses: actions/checkout@v4
       - name: Start n8n, import workflow, and test PostgreSQL backup restore
         run: bash scripts/ci-n8n-backup-smoke.sh
+
+
+  sandbox-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      GATEWAY_API_KEY: local-acceptance-key-123456789012345678901234
+      GITEA_WEBHOOK_SECRET: local-acceptance-hmac-123456789012345678901234
+      PREFECT_API_URL: http://prefect-ci:4200/api
+      N8N_DB_PASSWORD: local-acceptance-db-only-1234567890
+      N8N_ENCRYPTION_KEY: local-acceptance-encryption-123456789012345
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run isolated sandbox acceptance environment
+        run: python3 scripts/sandbox-acceptance.py
+      - name: Upload sandbox acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sandbox-acceptance-report
+          path: artifacts/sandbox-acceptance.json
+          if-no-files-found: warn
