@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+from urllib.parse import urlsplit
 import httpx
 from prefect import flow, get_run_logger
 from automation_hub.services.llm import summarize
@@ -15,8 +16,12 @@ def github_digest(query: str = "topic:self-hosted automation", max_items: int = 
     headers = {"Accept": "application/vnd.github+json", "User-Agent": "ai-automation-hub/0.1"}
     if os.getenv("GITHUB_TOKEN"):
         headers["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
+    api_base = (os.getenv("GITHUB_API_BASE_URL") or "https://api.github.com").rstrip("/")
+    parsed = urlsplit(api_base)
+    if parsed.scheme not in ("http", "https") or not parsed.netloc or parsed.username or parsed.password:
+        raise ValueError("Invalid GITHUB_API_BASE_URL")
     with httpx.Client(timeout=20, headers=headers) as client:
-        response = client.get("https://api.github.com/search/repositories", params={"q": query, "sort": "updated", "order": "desc", "per_page": max_items})
+        response = client.get(api_base + "/search/repositories", params={"q": query, "sort": "updated", "order": "desc", "per_page": max_items})
         response.raise_for_status()
         data = response.json()
     items = [{"name": x["full_name"], "url": x["html_url"], "description": x.get("description") or "", "updated_at": x["updated_at"], "stars": x["stargazers_count"]} for x in data["items"][:max_items]]

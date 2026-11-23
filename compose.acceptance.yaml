@@ -1,0 +1,25 @@
+# Disposable acceptance fixtures; never connect to NAS or production services.
+services:
+  fixture-api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.acceptance
+    ports:
+      - "127.0.0.1:18088:8088"
+    networks: [backend]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8088/healthz', timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+      start_period: 3s
+  worker:
+    environment:
+      GITEA_BASE_URL: http://fixture-api:8088
+      COMFYUI_BASE_URL: http://fixture-api:8088
+      COMFYUI_WORKFLOW_DIR: /app/workflows
+      GITHUB_API_BASE_URL: http://fixture-api:8088
+      LLM_BASE_URL: http://fixture-api:8088/v1
+      LLM_MODEL: sandbox-test-only
+      NOTIFY_WEBHOOK_URL: http://fixture-api:8088/notify
+      HEALTH_URLS: http://fixture-api:8088/healthz

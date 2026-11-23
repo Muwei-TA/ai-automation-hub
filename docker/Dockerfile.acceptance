@@ -1,0 +1,6 @@
+FROM python:3.12-slim
+WORKDIR /fixture
+COPY tests/acceptance/mock_services.py /fixture/mock_services.py
+RUN useradd --create-home --uid 10002 fixture
+USER fixture
+CMD ["python", "-u", "/fixture/mock_services.py"]
